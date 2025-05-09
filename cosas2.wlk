@@ -1,73 +1,85 @@
 object knightRider {
     method peso() = 500
     method peligrosidad() = 10
-    method bultos() = 1
-    method consencuenciaDeLaCarga() {}
+    method bulto() = 1
+    method consecuenciaDeCarga() {}
 }
 
 object bumblebee {
-    var estaComoRobot = false
-    method estaComoRobot() = estaComoRobot
-    method transformarseEnAuto() {estaComoRobot = false}
-    method transformarseEnRobot() {estaComoRobot = true}
+    var estado = auto
     method peso() = 800
-    method peligrosidad() = if(estaComoRobot) 30 else 15
-    method bultos() = 2
-    method consencuenciaDeLaCarga() {self.transformarseEnRobot()}
+    method peligrosidad() = estado.peligrosidad()
+    method transformarse() {
+        estado = estado.nuevoEstado()
+    }
+    method bulto() = 2
+    method consecuenciaDeCarga() {estado = robot}
 }
 
+object auto {
+    method peligrosidad() = 15
+    method nuevoEstado() = robot
+}
+
+object robot {
+    method peligrosidad() = 30
+    method nuevoEstado() = auto
+}
 object ladrillos {
-    var cantidad = 0
-    method cantidad(unaCantidad) {cantidad = unaCantidad}
-    method peso() = 2 * cantidad
+    var property cantidad = 0
     method peligrosidad() = 2
-    method bultos() = if (cantidad<=100) 1
-                      else if (cantidad.between(101, 300)) 2
-                      else 3
-    method bultosSinIf() = (2.min(1.max(cantidad-99))).max(3.min(cantidad-298))
-    method consencuenciaDeLaCarga() {cantidad += 12}
+    method peso() = 2 * cantidad
+//    method cantidad(unValor) {cantidad = unValor} //setter pero el property ya lo construye
+//    method cantidad() = cantidad //getter pero el property ya lo construye
+    method bulto() = if(cantidad<=100) 1
+                     else if(cantidad.between(101,300)) 2
+                     else 3
+    method bultoSinIf() = (2.min(1.max(cantidad-99))).max(3.min(cantidad-298))
+    method consecuenciaDeCarga() {cantidad += 12}
 }
 
 object arena {
     var property peso = 0
     method peligrosidad() = 1
-    method bultos() = 1
-    method consencuenciaDeLaCarga() {peso = 0.max(peso - 10)}
+    method bulto() = 1
+    method consecuenciaDeCarga() {peso = (peso - 10).max(0)}
 }
 
 object bateriaAntiaerea {
-    var estaConMisiles = false
-    method cargarMisiles() {estaConMisiles = true}
-    method descargarMisiles() {estaConMisiles = false}
-    method peso() = if(estaConMisiles) 300 else 200
-    method peligrosidad() = if(estaConMisiles) 100 else 0
-    method bultos() = if(estaConMisiles) 2 else 1
-    method consencuenciaDeLaCarga() {self.cargarMisiles()}
+    var tieneMisiles = false
+    method peligrosidad() = if(tieneMisiles) 100 else 0
+    method peso() = if(tieneMisiles) 300 else 200
+    method cargarMisiles() {tieneMisiles = true}
+    method descargarMisiles() {tieneMisiles = false}
+    method bulto() = if(tieneMisiles) 2 else 1
+    method consecuenciaDeCarga() {self.cargarMisiles()}
 }
 
 object contenedor {
-    const cosas = []
-    method agregarCosa(unaCosa) {cosas.add(unaCosa)}
-    method quitarCosa(unaCosa) {cosas.remove(unaCosa)}
-    method agregarVariasCosas(unaListaDeCosas) {cosas.addAll(unaListaDeCosas)}
-    method peso() = 100 + self.pesoDeLasCosas()
-    method pesoDeLasCosas() = cosas.sum({cosa => cosa.peso()})
-    method peligrosidad() = if(cosas.isEmpty()) 0 else cosas.max({c=>c.peligrosidad()}).peligrosidad()
-    method bultos() = 1 + cosas.sum({c=>c.bultos()})
-    method consencuenciaDeLaCarga() {cosas.forEarch({c=>c.consencuenciaDeLaCarga()})}
+    const contenido = []
+    method peso() = 100 + contenido.sum({c => c.peso()})
+    method peligrosidad() = 
+        if(contenido.isEmpty()) 0 else contenido.max({c => c.peligrosidad()}).peligrosidad()
+    method agregarCosa(unaCosa) {contenido.add(unaCosa)}
+    method quitarCosa(unaCosa) {contenido.remove(unaCosa)}
+    method agregarListaDeCosas(unaLista) {contenido.addAll(unaLista)}
+    method vaciarContenedor() {contenido.clear()}
+    method bulto() = 1 + contenido.sum({c => c.bulto()})
+    method consecuenciaDeCarga() {contenido.forEach({e=>e.consecuenciaDeCarga()})}
 }
 
 object residuos {
     var property peso = 0
     method peligrosidad() = 200
-    method bultos() = 1
-    method consencuenciaDeLaCarga() {peso += 15}
+    method bulto() = 1
+    method consecuenciaDeCarga() {peso += 15}
 }
 
 object embalaje {
-    var property cosaEnvuelta = arena
+    var cosaEnvuelta = arena
+    method envolver(unaCosa) {cosaEnvuelta = unaCosa}
     method peso() = cosaEnvuelta.peso()
-    method peligrosidad() = cosaEnvuelta.peligrosidad() / 2
-    method bultos() = 2
-    method consencuenciaDeLaCarga() {}
+    method peligrosidad() = cosaEnvuelta.peligrosidad() * 0.5
+    method bulto() = 2
+    method consecuenciaDeCarga() {}
 }

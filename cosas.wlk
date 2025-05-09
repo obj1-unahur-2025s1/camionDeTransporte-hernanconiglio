@@ -4,20 +4,29 @@ object knightRider {
 }
 
 object bumblebee {
-    var estaComoRobot = false
-    method estaComoRobot() = estaComoRobot
-    method transformarseEnAuto() {estaComoRobot = false}
-    method transformarseEnRobot() {estaComoRobot = true}
+    var estado = auto
     method peso() = 800
-    method peligrosidad() = if(estaComoRobot) 30 else 15
-
+    method peligrosidad() = estado.peligrosidad()
+    method transformarse() {
+        estado = estado.nuevoEstado()
+    }
 }
 
+object auto {
+    method peligrosidad() = 15
+    method nuevoEstado() = robot
+}
+
+object robot {
+    method peligrosidad() = 30
+    method nuevoEstado() = auto
+}
 object ladrillos {
-    var cantidad = 0
-    method cantidad(unaCantidad) {cantidad = unaCantidad}
-    method peso() = 2 * cantidad
+    var property cantidad = 0
     method peligrosidad() = 2
+    method peso() = 2 * cantidad
+//    method cantidad(unValor) {cantidad = unValor} //setter pero el property ya lo construye
+//    method cantidad() = cantidad //getter pero el property ya lo construye
 }
 
 object arena {
@@ -26,21 +35,22 @@ object arena {
 }
 
 object bateriaAntiaerea {
-    var estaConMisiles = false
-    method cargarMisiles() {estaConMisiles = true}
-    method descargarMisiles() {estaConMisiles = false}
-    method peso() = if(estaConMisiles) 300 else 200
-    method peligrosidad() = if(estaConMisiles) 100 else 0
+    var tieneMisiles = false
+    method peligrosidad() = if(tieneMisiles) 100 else 0
+    method peso() = if(tieneMisiles) 300 else 200
+    method cargarMisiles() {tieneMisiles = true}
+    method descargarMisiles() {tieneMisiles = false}
 }
 
 object contenedor {
-    const cosas = []
-    method agregarCosa(unaCosa) {cosas.add(unaCosa)}
-    method quitarCosa(unaCosa) {cosas.remove(unaCosa)}
-    method agregarVariasCosas(unaListaDeCosas) {cosas.addAll(unaListaDeCosas)}
-    method peso() = 100 + self.pesoDeLasCosas()
-    method pesoDeLasCosas() = cosas.sum({cosa => cosa.peso()})
-    method peligrosidad() = if(cosas.isEmpty()) 0 else cosas.max({c=>c.peligrosidad()}).peligrosidad()
+    const contenido = []
+    method peso() = 100 + contenido.sum({c => c.peso()})
+    method peligrosidad() = 
+        if(contenido.isEmpty()) 0 else contenido.max({c => c.peligrosidad()}).peligrosidad()
+    method agregarCosa(unaCosa) {contenido.add(unaCosa)}
+    method quitarCosa(unaCosa) {contenido.remove(unaCosa)}
+    method agregarListaDeCosas(unaLista) {contenido.addAll(unaLista)}
+    method vaciarContenedor() {contenido.clear()}
 }
 
 object residuos {
@@ -49,7 +59,8 @@ object residuos {
 }
 
 object embalaje {
-    var property cosaEnvuelta = arena
+    var cosaEnvuelta = arena
+    method envolver(unaCosa) {cosaEnvuelta = unaCosa}
     method peso() = cosaEnvuelta.peso()
-    method peligrosidad() = cosaEnvuelta.peligrosidad() / 2
+    method peligrosidad() = cosaEnvuelta.peligrosidad() * 0.5
 }
